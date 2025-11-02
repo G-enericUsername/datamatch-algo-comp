@@ -161,6 +161,31 @@ bool try_propose(const int proposer,
                         const int ucount, 
                         std::set<int>* match_sets) {
     // TODO
+for (int &pos = cur_poss[proposer]; pos < ucount; ++pos) {
+        int candidate = sorted_indices[proposer][pos];
+        if (scores[proposer][candidate] == -1) continue; // cannot propose
+        if (matched[proposer][candidate]) continue;      // already matched
+
+        // found valid candidate, try proposoal
+        if (match_sets[candidate].size() < iter) {
+            addmatch(proposer, candidate, matched, match_sets);
+            ++pos;
+            return true;
+        }
+
+        // see if proposer is better than someone
+        int worst_partner = find_worst_partner(candidate, scores, match_sets);
+        if (worst_partner != -1 && 
+            scores[candidate][proposer] > scores[candidate][worst_partner]) {
+
+            removematch(candidate, worst_partner, matched, match_sets);
+            addmatch(candidate, proposer, matched, match_sets);
+            ++pos;
+            return true;
+        }
+
+        // rejected; move on to next candidate
+    }
     return false;
 }
 
@@ -180,7 +205,24 @@ void make_matches(const int target,
                   const int ucount,
                   std::set<int>* match_sets) {
 
-    // TODO
+    for (int i = 0; i < ucount; ++i)
+        cur_poss[i] = 0;
+
+    for (int iter = 1; iter <= target; ++iter) {
+        bool changed;
+        do {
+            changed = false;
+            for (int proposer = 0; proposer < ucount; ++proposer) {
+                if (match_sets[proposer].size() < static_cast<size_t>(iter)) {
+                    bool proposed = try_propose(proposer, iter, sorted_indices,
+                                                scores, matched, cur_poss,
+                                                ucount, match_sets);
+                    if (proposed) changed = true;
+                }
+            }
+        } while (changed);
+    }
+
     return;
 }
 
@@ -232,3 +274,4 @@ void perform_matching(const int target, int** scores,
         ucount,
         match_sets_vec.data());
 }
+
