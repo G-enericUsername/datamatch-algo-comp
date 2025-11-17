@@ -361,8 +361,8 @@ int main(int argc, char** argv) {
             }
         }
 
-        /// TODO: Make noDormMatch logic here. You can make helper functions if
-        /// you want.
+        /// I lowkey accidentally made the bugfix in the original branch, so I'm going to pretend its still unfixed there
+        /// and I'm fixing it here :)
 
         logger.log(INFO, "Computing scores");
         std::unordered_map<std::string, std::string> cross_schools; // empty
